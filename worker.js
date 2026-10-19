@@ -429,11 +429,17 @@ function getSecretBytes(alt = false) {
 }
 
 /* ---------------- signing ---------------- */
-const DEVICE_ID = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, "0")).join("");
+/* NOTE: generated lazily (not at module top level) — Workers forbid
+   crypto.getRandomValues() in global scope (validation error 10021). */
+let _DEVICE_ID = null;
+function deviceId() {
+  if (!_DEVICE_ID) _DEVICE_ID = [...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, "0")).join("");
+  return _DEVICE_ID;
+}
 function clientInfo() {
   return JSON.stringify({
     package_name: "com.community.mbox.in", version_name: "4.0.03.0920.03",
-    version_code: 50020130, os: "android", os_version: "14", device_id: DEVICE_ID,
+    version_code: 50020130, os: "android", os_version: "14", device_id: deviceId(),
     install_store: "official", gaid: "1b2212c1-dadf-43c3-a0c8-bd6ce48ae22d",
     brand: "Google", model: "Pixel 8", system_language: "en", net: "NETWORK_WIFI",
     region: "IN", timezone: "Asia/Calcutta", sp_code: "",
